@@ -4,20 +4,22 @@ const axios = require("axios");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CONFIGURACIÓN FIJA
-const PLAYER_NAME = "calisttenia";
-const POLL_INTERVAL = 60000;
+// 🔑 ID REAL DEL JUGADOR
+const PLAYER_ID = "X-Mx97u4Q5SKEh1T_cV-OQ";
+const PLAYER_NAME = "CalisTTenia";
 
+const POLL_INTERVAL = 60000;
 const sessions = {};
 
 app.use(express.static("public"));
 
 async function fetchEvents() {
   try {
-    const url = `https://gameinfo.albiononline.com/api/gameinfo/players/${PLAYER_NAME}/kills`;
+    const url = `https://gameinfo.albiononline.com/api/gameinfo/players/${PLAYER_ID}/kills?limit=50`;
     const res = await axios.get(url);
     return res.data;
-  } catch {
+  } catch (err) {
+    console.error("Error fetching events");
     return [];
   }
 }
@@ -51,7 +53,7 @@ setInterval(async () => {
 
 app.get("/stats", (req, res) => {
   const sessionId = req.query.session || "default";
-  const key = `${PLAYER_NAME}_${sessionId}`;
+  const key = `${PLAYER_ID}_${sessionId}`;
 
   if (!sessions[key]) {
     sessions[key] = {
@@ -75,3 +77,4 @@ app.get("/stats", (req, res) => {
 app.listen(PORT, () => {
   console.log("Albion Overlay activo");
 });
+
