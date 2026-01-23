@@ -1,39 +1,45 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Albion PvP Overlay</title>
   <style>
     body {
       margin: 0;
       background: transparent;
-      color: #f5f5f5;
+      color: white;
       font-family: Arial, sans-serif;
-      font-size: 28px;
-      text-shadow: 2px 2px 4px #000;
+    }
+
+    .overlay {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 15px 25px;
+      border-radius: 10px;
+      display: inline-flex;
+      gap: 25px;
+      font-size: 22px;
     }
   </style>
 </head>
 <body>
-  <div id="overlay">Cargando...</div>
+  <div class="overlay">
+    ⚔️ Kills: <span id="kills">0</span>
+    💀 Deaths: <span id="deaths">0</span>
+    💰 Profit: <span id="profit">0</span> silver
+  </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const session = params.get("session") || "default";
+    // datos falsos por ahora (luego los conectamos)
+    let kills = 0;
+    let deaths = 0;
+    let profit = 0;
 
-    async function update() {
-      const res = await fetch(`/stats?session=${session}`);
-      const data = await res.json();
-
-      document.getElementById("overlay").innerHTML = `
-        ⚔️ Kills: ${data.kills}<br>
-        ☠️ Deaths: ${data.deaths}<br>
-        💰 Profit PvP: ${data.profit.toLocaleString()}
-      `;
-    }
-
-    setInterval(update, 3000);
-    update();
+    setInterval(() => {
+      kills++;
+      profit += 120000;
+      document.getElementById("kills").innerText = kills;
+      document.getElementById("profit").innerText = profit;
+    }, 5000);
   </script>
 </body>
 </html>
