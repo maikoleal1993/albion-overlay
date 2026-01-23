@@ -12,9 +12,9 @@
     }
 
     .overlay {
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.65);
       padding: 15px 25px;
-      border-radius: 10px;
+      border-radius: 12px;
       display: inline-flex;
       gap: 25px;
       font-size: 22px;
@@ -25,21 +25,30 @@
   <div class="overlay">
     ⚔️ Kills: <span id="kills">0</span>
     💀 Deaths: <span id="deaths">0</span>
-    💰 Profit: <span id="profit">0</span> silver
+    💰 Profit: <span id="profit">0</span>
   </div>
 
   <script>
-    // datos falsos por ahora (luego los conectamos)
-    let kills = 0;
-    let deaths = 0;
-    let profit = 0;
+    // 👉 leemos el parámetro ?session= de la URL
+    const params = new URLSearchParams(window.location.search);
+    const session = params.get("session") || "default";
 
-    setInterval(() => {
-      kills++;
-      profit += 120000;
-      document.getElementById("kills").innerText = kills;
-      document.getElementById("profit").innerText = profit;
-    }, 5000);
+    async function updateStats() {
+      try {
+        const res = await fetch(`/stats?session=${session}`);
+        const data = await res.json();
+
+        document.getElementById("kills").innerText = data.kills;
+        document.getElementById("deaths").innerText = data.deaths;
+        document.getElementById("profit").innerText =
+          Math.floor(data.profit / 1000) + "k";
+      } catch (e) {
+        console.error("Error obteniendo stats");
+      }
+    }
+
+    updateStats();
+    setInterval(updateStats, 30000); // cada 30 segundos
   </script>
 </body>
 </html>
