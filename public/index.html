@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Albion PvP Overlay</title>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      font-size: 28px;
+      text-shadow: 2px 2px 4px #000;
+    }
+  </style>
+</head>
+<body>
+  <div id="overlay">Cargando...</div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const session = params.get("session") || "default";
+
+    async function update() {
+      const res = await fetch(`/stats?session=${session}`);
+      const data = await res.json();
+
+      document.getElementById("overlay").innerHTML = `
+        ⚔️ Kills: ${data.kills}<br>
+        ☠️ Deaths: ${data.deaths}<br>
+        💰 Profit PvP: ${data.profit.toLocaleString()}
+      `;
+    }
+
+    setInterval(update, 3000);
+    update();
+  </script>
+</body>
+</html>
