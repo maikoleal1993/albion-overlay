@@ -1,80 +1,69 @@
 const express = require("express");
-const axios = require("axios");
+const fetch = require("node-fetch");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 🔑 ID REAL DEL JUGADOR
-const PLAYER_ID = "X-Mx97u4Q5SKEh1T_cV-OQ";
-const PLAYER_NAME = "CalisTTenia";
+// CONFIGURACIÓN
+const PLAYER_ID = "PEGA_AQUI_EL_ID_DE_CALISTTENIA";
+const PLAYER_NAME = "Calisttenia";
+const SERVER = "Europe";
 
-const POLL_INTERVAL = 60000;
-const sessions = {};
+// Estado en memoria
+let stats = {
+  kills: 0,
+  deaths: 0,
+  profit: 0,
+  lastEventId: null
+};
 
+// Servir frontend
 app.use(express.static("public"));
 
-async function fetchEvents() {
+// Endpoint para el overlay
+app.get("/stats", (req, res) => {
+  res.json(stats);
+});
+
+// Actualización desde Albion
+async function updateStats() {
   try {
-    const url = `https://gameinfo.albiononline.com/api/gameinfo/players/${PLAYER_ID}/kills?limit=50`;
-    const res = await axios.get(url);
-    return res.data;
+    const url = `https://gameinfo.albiononline.com/api/gameinfo/players/${PLAYER_ID}/events?limit=10&offset=0&server=${SERVER}`;
+    const response = await fetch(url);
+    const events = await response.json();
+
+    if (!Array.isArray(events) || events.length === 0) return;
+
+    for (const event of events.reverse()) {
+      if (event.EventId === stats.lastEventId) continue;
+
+      const victimValue =
+        (event.Victim?.Equipment?.EstimatedValue || 0) +
+        (event.Victim?.Inventory?.EstimatedValue || 0);
+
+      // Kill
+      if (event.Killer?.Id === PLAYER_ID) {
+        stats.kills += 1;
+        stats.profit += victimValue;
+      }
+
+      // Death
+      if (event.Victim?.Id === PLAYER_ID) {
+        stats.deaths += 1;
+        stats.profit -= victimValue;
+      }
+
+      stats.lastEventId = event.EventId;
+    }
   } catch (err) {
-    console.error("Error fetching events");
-    return [];
+    console.error("Error actualizando stats:", err.message);
   }
 }
 
-setInterval(async () => {
-  const events = await fetchEvents();
+// Polling cada 15s
+setInterval(updateStats, 15000);
 
-  for (const key in sessions) {
-    const session = sessions[key];
-
-    for (const e of events) {
-      if (session.processed.has(e.EventId)) continue;
-
-      const eventTime = new Date(e.TimeStamp).getTime();
-      if (eventTime < session.startTime) continue;
-
-      session.processed.add(e.EventId);
-
-      if (e.Killer?.Name === PLAYER_NAME) {
-        session.kills++;
-        session.profit += e.TotalVictimKillFame || 0;
-      }
-
-      if (e.Victim?.Name === PLAYER_NAME) {
-        session.deaths++;
-        session.profit -= e.TotalVictimKillFame || 0;
-      }
-    }
-  }
-}, POLL_INTERVAL);
-
-app.get("/stats", (req, res) => {
-  const sessionId = req.query.session || "default";
-  const key = `${PLAYER_ID}_${sessionId}`;
-
-  if (!sessions[key]) {
-    sessions[key] = {
-      startTime: Date.now(),
-      kills: 0,
-      deaths: 0,
-      profit: 0,
-      processed: new Set()
-    };
-  }
-
-  const s = sessions[key];
-  res.json({
-    player: PLAYER_NAME,
-    kills: s.kills,
-    deaths: s.deaths,
-    profit: s.profit
-  });
-});
-
+// Arranque
 app.listen(PORT, () => {
-  console.log("Albion Overlay activo");
+  console.log("🔥 Albion Overlay Calisttenia EU – Silver estimado activo");
 });
-
