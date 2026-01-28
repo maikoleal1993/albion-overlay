@@ -2,55 +2,95 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Albion PvP Overlay</title>
+  <title>Albion PvP Hardcore Overlay</title>
 
   <style>
     body {
       margin: 0;
       background: transparent;
-      font-family: Arial, sans-serif;
+      font-family: "Segoe UI", Tahoma, sans-serif;
     }
 
     .overlay {
-      width: 360px;
-      padding: 20px;
-      background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
-      border: 3px solid #b30000;
-      border-radius: 14px;
-      box-shadow: 0 0 30px rgba(179, 0, 0, 0.6);
+      width: 380px;
+      padding: 22px;
+      background: radial-gradient(circle at top, #1a0000, #050000 70%);
+      border: 3px solid #ff2a2a;
+      border-radius: 16px;
+      box-shadow:
+        0 0 25px rgba(255, 0, 0, 0.6),
+        inset 0 0 25px rgba(255, 0, 0, 0.25);
       color: white;
+      animation: pulse 2.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 18px rgba(255,0,0,0.4), inset 0 0 18px rgba(255,0,0,0.2); }
+      50% { box-shadow: 0 0 35px rgba(255,0,0,0.85), inset 0 0 30px rgba(255,0,0,0.35); }
+      100% { box-shadow: 0 0 18px rgba(255,0,0,0.4), inset 0 0 18px rgba(255,0,0,0.2); }
     }
 
     .title {
-      font-size: 22px;
-      font-weight: bold;
+      font-size: 24px;
+      font-weight: 900;
       text-align: center;
-      margin-bottom: 14px;
-      color: #ff4444;
-      text-shadow: 0 0 8px #ff0000;
+      margin-bottom: 18px;
+      color: #ff3b3b;
+      letter-spacing: 1px;
+      text-shadow:
+        0 0 6px #ff0000,
+        0 0 14px #aa0000;
     }
 
     .stat {
       display: flex;
       justify-content: space-between;
-      font-size: 18px;
-      margin: 8px 0;
+      align-items: center;
+      font-size: 19px;
+      margin: 10px 0;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
 
     .label {
-      color: #aaa;
+      color: #ffb3b3;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
     }
 
     .value {
-      font-weight: bold;
-      color: #fff;
+      font-weight: 800;
+      font-size: 20px;
+      text-shadow: 0 0 8px rgba(255,0,0,0.6);
+    }
+
+    .profit-positive {
+      color: #00ff88;
+      text-shadow: 0 0 10px rgba(0,255,136,0.8);
+    }
+
+    .profit-negative {
+      color: #ff4444;
+      text-shadow: 0 0 10px rgba(255,68,68,0.9);
+    }
+
+    .shake {
+      animation: shake 0.35s;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-2px); }
+      50% { transform: translateX(2px); }
+      75% { transform: translateX(-2px); }
+      100% { transform: translateX(0); }
     }
   </style>
 </head>
 <body>
 
-  <div class="overlay">
-    <div class="title">⚔️ Albion PvP Session</div>
+  <div class="overlay" id="overlay">
+    <div class="title">⚔️ ALBION PVP ⚔️</div>
 
     <div class="stat">
       <span class="label">Kills</span>
@@ -72,15 +112,35 @@
     const params = new URLSearchParams(window.location.search);
     const session = params.get("session") || "1";
 
+    let lastKills = 0;
+    let lastDeaths = 0;
+    let lastProfit = 0;
+
     async function updateStats() {
       try {
         const res = await fetch(`/stats?session=${session}`);
         const data = await res.json();
 
+        const overlay = document.getElementById("overlay");
+
+        if (data.kills > lastKills || data.deaths > lastDeaths) {
+          overlay.classList.add("shake");
+          setTimeout(() => overlay.classList.remove("shake"), 400);
+        }
+
         document.getElementById("kills").textContent = data.kills;
         document.getElementById("deaths").textContent = data.deaths;
-        document.getElementById("profit").textContent =
-          data.profit.toLocaleString() + " silver";
+
+        const profitEl = document.getElementById("profit");
+        profitEl.textContent = data.profit.toLocaleString() + " silver";
+
+        profitEl.className = "value " + 
+          (data.profit >= 0 ? "profit-positive" : "profit-negative");
+
+        lastKills = data.kills;
+        lastDeaths = data.deaths;
+        lastProfit = data.profit;
+
       } catch (e) {
         console.error("Error cargando stats", e);
       }
