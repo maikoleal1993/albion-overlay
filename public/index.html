@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Albion PvP Hardcore Overlay</title>
+  <title>PVP Session</title>
 
   <style>
     body {
@@ -12,29 +12,34 @@
     }
 
     .overlay {
-      width: 420px;
-      padding: 26px;
-      background: radial-gradient(circle at top, #1a0000, #050000 70%);
+      width: 620px;
+      padding: 24px 30px;
+      background: radial-gradient(circle at top, #1a0000, #050000 75%);
       border: 3px solid #ff2a2a;
-      border-radius: 18px;
+      border-radius: 20px;
       box-shadow:
-        0 0 25px rgba(255, 0, 0, 0.6),
-        inset 0 0 25px rgba(255, 0, 0, 0.25);
+        0 0 28px rgba(255, 0, 0, 0.6),
+        inset 0 0 26px rgba(255, 0, 0, 0.25);
       color: white;
       animation: pulse 2.5s infinite ease-in-out;
     }
 
     @keyframes pulse {
-      0% { box-shadow: 0 0 20px rgba(255,0,0,0.45), inset 0 0 20px rgba(255,0,0,0.25); }
-      50% { box-shadow: 0 0 42px rgba(255,0,0,0.9), inset 0 0 34px rgba(255,0,0,0.4); }
-      100% { box-shadow: 0 0 20px rgba(255,0,0,0.45), inset 0 0 20px rgba(255,0,0,0.25); }
+      0% { box-shadow: 0 0 22px rgba(255,0,0,0.45), inset 0 0 22px rgba(255,0,0,0.25); }
+      50% { box-shadow: 0 0 46px rgba(255,0,0,0.9), inset 0 0 36px rgba(255,0,0,0.4); }
+      100% { box-shadow: 0 0 22px rgba(255,0,0,0.45), inset 0 0 22px rgba(255,0,0,0.25); }
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
     }
 
     .title {
       font-size: 30px;
       font-weight: 900;
-      text-align: center;
-      margin-bottom: 20px;
       color: #ff3b3b;
       letter-spacing: 1.5px;
       text-shadow:
@@ -42,37 +47,48 @@
         0 0 18px #aa0000;
     }
 
-    .stat {
+    .credit {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.5px;
+    }
+
+    .stats {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 24px;
-      margin: 14px 0;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      gap: 26px;
+    }
+
+    .stat {
+      flex: 1;
+      text-align: center;
     }
 
     .label {
+      display: block;
+      font-size: 16px;
+      font-weight: 700;
       color: #ffb3b3;
       text-transform: uppercase;
       letter-spacing: 1px;
-      font-weight: 700;
+      margin-bottom: 6px;
     }
 
     .value {
+      font-size: 38px;
       font-weight: 900;
-      font-size: 32px;
-      text-shadow: 0 0 10px rgba(255,0,0,0.7);
+      text-shadow: 0 0 12px rgba(255,0,0,0.7);
     }
 
     .profit-positive {
       color: #00ff88;
-      text-shadow: 0 0 14px rgba(0,255,136,0.9);
+      text-shadow: 0 0 16px rgba(0,255,136,0.9);
     }
 
     .profit-negative {
       color: #ff4444;
-      text-shadow: 0 0 14px rgba(255,68,68,0.95);
+      text-shadow: 0 0 16px rgba(255,68,68,0.95);
     }
 
     .shake {
@@ -81,42 +97,37 @@
 
     @keyframes shake {
       0% { transform: translateX(0); }
-      25% { transform: translateX(-3px); }
-      50% { transform: translateX(3px); }
-      75% { transform: translateX(-3px); }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-4px); }
       100% { transform: translateX(0); }
-    }
-
-    .credit {
-      margin-top: 12px;
-      text-align: right;
-      font-size: 12px;
-      color: rgba(255,255,255,0.35);
-      letter-spacing: 0.5px;
     }
   </style>
 </head>
 <body>
 
   <div class="overlay" id="overlay">
-    <div class="title">⚔️ ALBION PVP ⚔️</div>
-
-    <div class="stat">
-      <span class="label">Asesinatos</span>
-      <span class="value" id="kills">0</span>
+    <div class="header">
+      <div class="title">⚔️ ALBION PVP ⚔️</div>
+      <div class="credit">By Bloodyphantom</div>
     </div>
 
-    <div class="stat">
-      <span class="label">Muertes</span>
-      <span class="value" id="deaths">0</span>
-    </div>
+    <div class="stats">
+      <div class="stat">
+        <span class="label">Asesinatos</span>
+        <span class="value" id="kills">0</span>
+      </div>
 
-    <div class="stat">
-      <span class="label">Profit</span>
-      <span class="value" id="profit">0</span>
-    </div>
+      <div class="stat">
+        <span class="label">Muertes</span>
+        <span class="value" id="deaths">0</span>
+      </div>
 
-    <div class="credit">By Bloodyphantom</div>
+      <div class="stat">
+        <span class="label">Profit</span>
+        <span class="value" id="profit">0</span>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -143,13 +154,11 @@
 
         const profitEl = document.getElementById("profit");
         profitEl.textContent = data.profit.toLocaleString() + " silver";
-
         profitEl.className =
           "value " + (data.profit >= 0 ? "profit-positive" : "profit-negative");
 
         lastKills = data.kills;
         lastDeaths = data.deaths;
-
       } catch (e) {
         console.error("Error cargando stats", e);
       }
