@@ -3,52 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <title>Albion PvP Overlay</title>
+
   <style>
     body {
       margin: 0;
       background: transparent;
-      color: white;
-      font-family: Arial, sans-serif;
+      font-family: "Segoe UI", Arial, sans-serif;
     }
 
-    .overlay {
-      background: rgba(0, 0, 0, 0.65);
-      padding: 15px 25px;
+    .card {
+      min-width: 260px;
+      padding: 16px 20px;
       border-radius: 12px;
-      display: inline-flex;
-      gap: 25px;
-      font-size: 22px;
+      background: rgba(20, 20, 20, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+      color: #f2f2f2;
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      text-align: center;
+      color: #f5c542;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 6px 0;
+      font-size: 20px;
+    }
+
+    .label {
+      opacity: 0.85;
+    }
+
+    .value {
+      font-weight: 700;
+    }
+
+    .profit {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      text-align: center;
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .positive {
+      color: #3cff7a;
+    }
+
+    .negative {
+      color: #ff5c5c;
+    }
+
+    .neutral {
+      color: #dddddd;
     }
   </style>
 </head>
+
 <body>
-  <div class="overlay">
-    ⚔️ Kills: <span id="kills">0</span>
-    💀 Deaths: <span id="deaths">0</span>
-    💰 Profit: <span id="profit">0</span>
+  <div class="card">
+    <div class="title">PVP SESSION</div>
+
+    <div class="row">
+      <div class="label">⚔️ Kills</div>
+      <div class="value" id="kills">0</div>
+    </div>
+
+    <div class="row">
+      <div class="label">☠️ Deaths</div>
+      <div class="value" id="deaths">0</div>
+    </div>
+
+    <div class="profit neutral" id="profit">
+      0
+    </div>
   </div>
 
   <script>
-    // 👉 leemos el parámetro ?session= de la URL
     const params = new URLSearchParams(window.location.search);
     const session = params.get("session") || "default";
 
-    async function updateStats() {
-      try {
-        const res = await fetch(`/stats?session=${session}`);
-        const data = await res.json();
+    async function update() {
+      const res = await fetch(`/stats?session=${session}`);
+      const data = await res.json();
 
-        document.getElementById("kills").innerText = data.kills;
-        document.getElementById("deaths").innerText = data.deaths;
-        document.getElementById("profit").innerText =
-          Math.floor(data.profit / 1000) + "k";
-      } catch (e) {
-        console.error("Error obteniendo stats");
-      }
+      document.getElementById("kills").textContent = data.kills;
+      document.getElementById("deaths").textContent = data.deaths;
+
+      const profitEl = document.getElementById("profit");
+      const profit = data.profit;
+
+      profitEl.textContent = profit.toLocaleString();
+
+      profitEl.classList.remove("positive", "negative", "neutral");
+
+      if (profit > 0) profitEl.classList.add("positive");
+      else if (profit < 0) profitEl.classList.add("negative");
+      else profitEl.classList.add("neutral");
     }
 
-    updateStats();
-    setInterval(updateStats, 30000); // cada 30 segundos
+    update();
+    setInterval(update, 3000);
   </script>
 </body>
 </html>
